@@ -1,4 +1,4 @@
-<project name="processingLibs" default="build">
+<project name="PeasyCam" default="build">
 
 	<description>
        PeasyCam build
