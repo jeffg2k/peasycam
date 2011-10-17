@@ -633,13 +633,8 @@ public class PeasyCam {
 	}
 
 	public void setPanOnScreenEdge(final boolean panOnScreenEdge) {
-		setPanOnScreenEdge(panOnScreenEdge, false);
-	}
-
-	public void setPanOnScreenEdge(final boolean panOnScreenEdge,
-			final boolean panEdgeReverse) {
 		if (panOnScreenEdge && edgepan == null) {
-			edgepan = new EdgeMonitor(panEdgeReverse);
+			edgepan = new EdgeMonitor();
 		} else if (!panOnScreenEdge && edgepan != null) {
 			edgepan.cancel();
 			edgepan = null;
@@ -772,9 +767,8 @@ public class PeasyCam {
 		 * beyond this area.
 		 */
 
-		EdgeMonitor(boolean reverse) {
+		EdgeMonitor() {
 			mouseIsOverSketch = true;
-			setReversePan(reverse);
 			p.registerDraw(this);
 		}
 
