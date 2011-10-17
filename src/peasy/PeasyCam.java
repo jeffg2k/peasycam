@@ -1,20 +1,19 @@
 /*
-   The PeasyCam Processing library, which provides an easy-peasy
-   camera for 3D sketching.
-  
-   Copyright 2008 Jonathan Feinberg
+The PeasyCam Processing library, which provides an easy-peasy
+camera for 3D sketching.
+Copyright 2008 Jonathan Feinberg
 
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
  */
 package peasy;
 
@@ -54,17 +53,19 @@ public class PeasyCam {
 	private boolean resetOnDoubleClick = true;
 	private EdgeMonitor edgepan;
 	private boolean mouseIsOverSketch;
+	private boolean reversePan = false;
+	private boolean reverseZoom = false;
+	private boolean reverseRotate = false;
 	private Point mouseExit;
 	private double minimumDistance = 1;
 	private double maximumDistance = Double.MAX_VALUE;
 
-	private final DampedAction rotateX, rotateY, rotateZ, dampedZoom, dampedPanX,
-			dampedPanY;
+	private final DampedAction rotateX, rotateY, rotateZ, dampedZoom,
+			dampedPanX, dampedPanY;
 
 	private double distance;
 	private Vector3D center;
 	private Rotation rotation;
-
 	private Constraint dragConstraint = null;
 
 	private final InterpolationManager rotationInterps = new InterpolationManager();
@@ -72,7 +73,11 @@ public class PeasyCam {
 	private final InterpolationManager distanceInterps = new InterpolationManager();
 
 	private final PeasyDragHandler panHandler /* ha ha ha */= new PeasyDragHandler() {
-		public void handleDrag(final double dx, final double dy) {
+		public void handleDrag(double dx, double dy) {
+			if (reversePan) {
+				dy = dy * -1;
+				dx = dx * -1;
+			}
 			dampedPanX.impulse(panScale * dx / 8.);
 			dampedPanY.impulse(panScale * dy / 8.);
 		}
@@ -80,21 +85,31 @@ public class PeasyCam {
 	private PeasyDragHandler centerDragHandler = panHandler;
 
 	private final PeasyDragHandler rotateHandler = new PeasyDragHandler() {
-		public void handleDrag(final double dx, final double dy) {
+		public void handleDrag(double dx, double dy) {
+			if (reverseRotate) {
+				dy = dy * -1;
+				dx = dx * -1;
+			}
 			mouseRotate(dx, dy);
 		}
 	};
 	private PeasyDragHandler leftDragHandler = rotateHandler;
 
 	private final PeasyDragHandler zoomHandler = new PeasyDragHandler() {
-		public void handleDrag(final double dx, final double dy) {
+		public void handleDrag(final double dx, double dy) {
+			if (reverseZoom) {
+				dy = dy * -1;
+			}
 			dampedZoom.impulse(zoomScale * dy / 10.0);
 		}
 	};
 	private PeasyDragHandler rightDraghandler = zoomHandler;
 
 	private final PeasyWheelHandler zoomWheelHandler = new PeasyWheelHandler() {
-		public void handleWheel(final int delta) {
+		public void handleWheel(int delta) {
+			if (reverseZoom) {
+				delta = delta * -1;
+			}
 			dampedZoom.impulse(zoomScale * wheelScale * delta);
 		}
 	};
@@ -110,40 +125,48 @@ public class PeasyCam {
 
 	private final PMatrix3D originalMatrix; // for HUD restore
 
-	public final String VERSION = "0.91";
+	public final String VERSION = "101";
 
 	public PeasyCam(final PApplet parent, final double distance) {
 		this(parent, 0, 0, 0, distance);
 	}
 
-	public PeasyCam(final PApplet parent, final double lookAtX, final double lookAtY,
-			final double lookAtZ, final double distance) {
+	public void setcam() {
+		p.camera((float) 70.0, (float) 35.0, (float) 120.0, (float) 0.0,
+				(float) 0.0, (float) 0.0, (float) 0.0, (float) 1.0, (float) 0.0);
+	}
+
+	public PeasyCam(final PApplet parent, final double lookAtX,
+			final double lookAtY, final double lookAtZ, final double distance) {
 		this.p = parent;
 		this.startCenter = this.center = new Vector3D(lookAtX, lookAtY, lookAtZ);
 		this.startDistance = this.distance = distance;
 		this.rotation = new Rotation();
-		this.originalMatrix = parent.getMatrix((PMatrix3D)null);
+		this.originalMatrix = parent.getMatrix((PMatrix3D) null);
 
 		feed();
 
 		rotateX = new DampedAction(this) {
 			@Override
 			protected void behave(final double velocity) {
-				rotation = rotation.applyTo(new Rotation(Vector3D.plusI, velocity));
+				rotation = rotation.applyTo(new Rotation(Vector3D.plusI,
+						velocity));
 			}
 		};
 
 		rotateY = new DampedAction(this) {
 			@Override
 			protected void behave(final double velocity) {
-				rotation = rotation.applyTo(new Rotation(Vector3D.plusJ, velocity));
+				rotation = rotation.applyTo(new Rotation(Vector3D.plusJ,
+						velocity));
 			}
 		};
 
 		rotateZ = new DampedAction(this) {
 			@Override
 			protected void behave(final double velocity) {
-				rotation = rotation.applyTo(new Rotation(Vector3D.plusK, velocity));
+				rotation = rotation.applyTo(new Rotation(Vector3D.plusK,
+						velocity));
 			}
 		};
 
@@ -172,6 +195,16 @@ public class PeasyCam {
 		System.out.println("PeasyCam v" + VERSION);
 	}
 
+	public void setDamping(double rdamp, double zdamp, double pdamp) {
+		// default is .84,.84,.84
+		rotateX.setDamping(Math.min(1, Math.max(0, rdamp)));
+		rotateY.setDamping(Math.min(1, Math.max(0, rdamp)));
+		rotateZ.setDamping(Math.min(1, Math.max(0, rdamp)));
+		dampedZoom.setDamping(Math.min(1, Math.max(0, zdamp)));
+		dampedPanY.setDamping(Math.min(1, Math.max(0, pdamp)));
+		dampedPanX.setDamping(Math.min(1, Math.max(0, pdamp)));
+	}
+
 	public void setActive(final boolean active) {
 		if (active == isActive) {
 			return;
@@ -191,7 +224,31 @@ public class PeasyCam {
 	public boolean isActive() {
 		return isActive;
 	}
-	
+
+	public void setReverseZoom(boolean reverse) {
+		reverseZoom = reverse;
+	}
+
+	public void setReverseRotate(boolean reverse) {
+		reverseRotate = reverse;
+	}
+
+	public void setReversePan(boolean reverse) {
+		reversePan = reverse;
+	}
+
+	public boolean isReversePan() {
+		return reversePan;
+	}
+
+	public boolean isReverseZoom() {
+		return reverseZoom;
+	}
+
+	public boolean isReverseRotate() {
+		return reverseRotate;
+	}
+
 	/**
 	 * <p>
 	 * Turn on or off default mouse-handling behavior:
@@ -266,7 +323,7 @@ public class PeasyCam {
 	public void setWheelHandler(final PeasyWheelHandler wheelHandler) {
 		this.wheelHandler = wheelHandler;
 	}
-	
+
 	public double getZoomScale() {
 		return zoomScale;
 	}
@@ -291,16 +348,6 @@ public class PeasyCam {
 		this.rotateScale = rotateScale;
 	}
 
-	public void setDamping(double rdamp, double zdamp, double pdamp) {
-		//default is .84,.84,.84
-		rotateX.setDamping(Math.min(1, Math.max(0, rdamp)));
-		rotateY.setDamping(Math.min(1, Math.max(0, rdamp)));
-		rotateZ.setDamping(Math.min(1, Math.max(0, rdamp)));
-		dampedZoom.setDamping(Math.min(1, Math.max(0, zdamp)));
-		dampedPanY.setDamping(Math.min(1, Math.max(0, pdamp)));
-		dampedPanX.setDamping(Math.min(1, Math.max(0, pdamp)));
-	}
-
 	public String version() {
 		return VERSION;
 	}
@@ -315,12 +362,14 @@ public class PeasyCam {
 
 	protected class PeasyMouseListener {
 		public void keyEvent(final KeyEvent e) {
-			if (e.getID() == KeyEvent.KEY_RELEASED && e.getKeyCode() == KeyEvent.VK_SHIFT) {
+			if (e.getID() == KeyEvent.KEY_RELEASED
+					&& e.getKeyCode() == KeyEvent.VK_SHIFT) {
 				dragConstraint = null;
 			}
 		}
 
 		public void mouseEvent(final MouseEvent e) {
+
 			if (resetOnDoubleClick && e.getID() == MouseEvent.MOUSE_CLICKED
 					&& e.getClickCount() == 2) {
 				reset();
@@ -356,7 +405,6 @@ public class PeasyCam {
 				mouseIsOverSketch = true;
 			}
 		}
-
 	}
 
 	private void mouseZoom(final double delta) {
@@ -370,9 +418,11 @@ public class PeasyCam {
 	}
 
 	private void mouseRotate(final double dx, final double dy) {
-		final Vector3D u = LOOK.scalarMultiply(100 + .6 * startDistance).negate();
+		final Vector3D u = LOOK.scalarMultiply(100 + .6 * startDistance)
+				.negate();
 		if (dragConstraint != Constraint.X) {
-			final double rho = Math.abs((p.width / 2d) - p.mouseX) / (p.width / 2d);
+			final double rho = Math.abs((p.width / 2d) - p.mouseX)
+					/ (p.width / 2d);
 			final double adz = Math.abs(dy) * rho;
 			final double ady = Math.abs(dy) * (1 - rho);
 			final int ySign = dy < 0 ? -1 : 1;
@@ -405,18 +455,20 @@ public class PeasyCam {
 		setDistance(newDistance, 300);
 	}
 
-	public void setDistance(final double newDistance, final long animationTimeMillis) {
+	public void setDistance(final double newDistance,
+			final long animationTimeMillis) {
 		distanceInterps.startInterpolation(new DistanceInterp(newDistance,
 				animationTimeMillis));
 	}
 
 	public float[] getLookAt() {
-		return new float[] { (float)center.getX(), (float)center.getY(),
-				(float)center.getZ() };
+		return new float[] { (float) center.getX(), (float) center.getY(),
+				(float) center.getZ() };
 	}
 
 	public void lookAt(final double x, final double y, final double z) {
-		centerInterps.startInterpolation(new CenterInterp(new Vector3D(x, y, z), 300));
+		centerInterps.startInterpolation(new CenterInterp(
+				new Vector3D(x, y, z), 300));
 	}
 
 	public void lookAt(final double x, final double y, final double z,
@@ -453,48 +505,60 @@ public class PeasyCam {
 	public void lookThrough(final double x, final double y, final double z,
 			final double distance, final long animationTimeMillis) {
 
-		  Vector3D CamVector = new Vector3D(x,y,z);
-		  
-		  Vector3D CVY = new Vector3D(0, CamVector.getY(), CamVector.getZ());
-		  Vector3D CVX = new Vector3D(1,0,0);
-		  Vector3D CVZ = Vector3D.crossProduct(CVX,CVY);
-		
-		  CVX = CVX.normalize();
-		  CVY = CVY.normalize();
-		  CVZ = CVZ.normalize();
+		Vector3D CamVector = new Vector3D(x, y, z);
 
-		  Vector3D PV = new Vector3D( Vector3D.dotProduct(CVX, CamVector)
-		                          , Vector3D.dotProduct(CVY,CamVector )
-		                          , Vector3D.dotProduct(CVZ, CamVector ));
+		Vector3D CVY = new Vector3D(0, CamVector.getY(), CamVector.getZ());
+		Vector3D CVX = new Vector3D(1, 0, 0);
+		Vector3D CVZ = Vector3D.crossProduct(CVX, CVY);
 
-		  double pitch = Math.atan2( CamVector.getZ(), CamVector.getY() ) - (Math.PI*.5);
-		  double yaw   = Math.atan2( PV.getX(), PV.getY() );
-		  double roll  = 0;
-		  
+		CVX = CVX.normalize();
+		CVY = CVY.normalize();
+		CVZ = CVZ.normalize();
+
+		Vector3D PV = new Vector3D(Vector3D.dotProduct(CVX, CamVector),
+				Vector3D.dotProduct(CVY, CamVector), Vector3D.dotProduct(CVZ,
+						CamVector));
+
+		double pitch = Math.atan2(CamVector.getZ(), CamVector.getY())
+				- (Math.PI * .5);
+		double yaw = Math.atan2(PV.getX(), PV.getY());
+		double roll = 0;
+
 		setDistance(distance, animationTimeMillis);
 		setRotations(pitch, yaw, roll, animationTimeMillis);
 	}
 
 	private void safeSetDistance(final double distance) {
-		this.distance = Math.min(maximumDistance, Math.max(minimumDistance, distance));
+
+		this.distance = Math.min(maximumDistance,
+				Math.max(minimumDistance, distance));
 		feed();
+
 	}
 
 	public void feed() {
-		final Vector3D pos = rotation.applyTo(LOOK).scalarMultiply(distance).add(center);
+		final Vector3D pos = rotation.applyTo(LOOK).scalarMultiply(distance)
+				.add(center);
 		final Vector3D rup = rotation.applyTo(UP);
-		p.camera((float)pos.getX(), (float)pos.getY(), (float)pos.getZ(), //
-				(float)center.getX(), (float)center.getY(), (float)center.getZ(), //
-				(float)rup.getX(), (float)rup.getY(), (float)rup.getZ());
+		p.camera((float) pos.getX(), (float) pos.getY(),
+				(float) pos.getZ(), //
+				(float) center.getX(), (float) center.getY(),
+				(float) center.getZ(), //
+				(float) rup.getX(), (float) rup.getY(), (float) rup.getZ());
+
 	}
 
-	static void apply(final PGraphics g, final Vector3D center, final Rotation rotation,
-			final double distance) {
-		final Vector3D pos = rotation.applyTo(LOOK).scalarMultiply(distance).add(center);
+	static void apply(final PGraphics g, final Vector3D center,
+			final Rotation rotation, final double distance) {
+		final Vector3D pos = rotation.applyTo(LOOK).scalarMultiply(distance)
+				.add(center);
 		final Vector3D rup = rotation.applyTo(UP);
-		g.camera((float)pos.getX(), (float)pos.getY(), (float)pos.getZ(), //
-				(float)center.getX(), (float)center.getY(), (float)center.getZ(), //
-				(float)rup.getX(), (float)rup.getY(), (float)rup.getZ());
+
+		g.camera((float) pos.getX(), (float) pos.getY(),
+				(float) pos.getZ(), //
+				(float) center.getX(), (float) center.getY(),
+				(float) center.getZ(), //
+				(float) rup.getX(), (float) rup.getY(), (float) rup.getZ());
 	}
 
 	/**
@@ -503,8 +567,10 @@ public class PeasyCam {
 	 * @return float[]{x,y,z}
 	 */
 	public float[] getPosition() {
-		final Vector3D pos = rotation.applyTo(LOOK).scalarMultiply(distance).add(center);
-		return new float[] { (float)pos.getX(), (float)pos.getY(), (float)pos.getZ() };
+		final Vector3D pos = rotation.applyTo(LOOK).scalarMultiply(distance)
+				.add(center);
+		return new float[] { (float) pos.getX(), (float) pos.getY(),
+				(float) pos.getZ() };
 	}
 
 	public void reset() {
@@ -547,7 +613,7 @@ public class PeasyCam {
 	public double getMinimumDistance() {
 		return minimumDistance;
 	}
-	
+
 	public double getMaximumDistance() {
 		return maximumDistance;
 	}
@@ -569,8 +635,9 @@ public class PeasyCam {
 	public void setPanOnScreenEdge(final boolean panOnScreenEdge) {
 		setPanOnScreenEdge(panOnScreenEdge, false);
 	}
-	
-	public void setPanOnScreenEdge(final boolean panOnScreenEdge, final boolean panEdgeReverse){	
+
+	public void setPanOnScreenEdge(final boolean panOnScreenEdge,
+			final boolean panEdgeReverse) {
 		if (panOnScreenEdge && edgepan == null) {
 			edgepan = new EdgeMonitor(panEdgeReverse);
 		} else if (!panOnScreenEdge && edgepan != null) {
@@ -594,14 +661,15 @@ public class PeasyCam {
 	}
 
 	public boolean isMoving() {
-	   if (rotateX.getVelocity() == 0 && rotateY.getVelocity() == 0 && 
-			   rotateZ.getVelocity() == 0 && dampedZoom.getVelocity() == 0 && 
-			   dampedPanX.getVelocity() == 0 && dampedPanY.getVelocity() == 0 &&
-			   distanceInterps.isStopped() && centerInterps.isStopped()  && rotationInterps.isStopped() ) {
-		   return false;
-	   } 
-	   
-	   return true;
+		if (rotateX.getVelocity() == 0 && rotateY.getVelocity() == 0
+				&& rotateZ.getVelocity() == 0 && dampedZoom.getVelocity() == 0
+				&& dampedPanX.getVelocity() == 0
+				&& dampedPanY.getVelocity() == 0 && distanceInterps.isStopped()
+				&& centerInterps.isStopped() && rotationInterps.isStopped()) {
+			return false;
+		}
+
+		return true;
 	}
 
 	public void setState(final CameraState state) {
@@ -610,12 +678,12 @@ public class PeasyCam {
 
 	public void setState(final CameraState state, final long animationTimeMillis) {
 		if (animationTimeMillis > 0) {
-			rotationInterps.startInterpolation(new RotationInterp(state.rotation,
-					animationTimeMillis));
+			rotationInterps.startInterpolation(new RotationInterp(
+					state.rotation, animationTimeMillis));
 			centerInterps.startInterpolation(new CenterInterp(state.center,
 					animationTimeMillis));
-			distanceInterps.startInterpolation(new DistanceInterp(state.distance,
-					animationTimeMillis));
+			distanceInterps.startInterpolation(new DistanceInterp(
+					state.distance, animationTimeMillis));
 		} else {
 			this.rotation = state.rotation;
 			this.center = state.center;
@@ -642,31 +710,35 @@ public class PeasyCam {
 	}
 
 	/**
-	 * Express the current camera rotation as an equivalent series
-	 * of world rotations, in X, Y, Z order. This is useful when,
-	 * for example, you wish to orient text towards the camera
-	 * at all times, as in
+	 * Express the current camera rotation as an equivalent series of world
+	 * rotations, in X, Y, Z order. This is useful when, for example, you wish
+	 * to orient text towards the camera at all times, as in
 	 * 
-	 * <pre>float[] rotations = cam.getRotations(rotations);
-	 *rotateX(rotations[0]);
-	 *rotateY(rotations[1]);
-	 *rotateZ(rotations[2]);
-	 *text("Here I am!", 0, 0, 0);</pre>
+	 * <pre>
+	 * float[] rotations = cam.getRotations(rotations);
+	 * rotateX(rotations[0]);
+	 * rotateY(rotations[1]);
+	 * rotateZ(rotations[2]);
+	 * text(&quot;Here I am!&quot;, 0, 0, 0);
+	 * </pre>
 	 */
 	public float[] getRotations() {
 		try {
 			final double[] angles = rotation.getAngles(RotationOrder.XYZ);
-			return new float[] { (float)angles[0], (float)angles[1], (float)angles[2] };
+			return new float[] { (float) angles[0], (float) angles[1],
+					(float) angles[2] };
 		} catch (final CardanEulerSingularityException e) {
 		}
 		try {
 			final double[] angles = rotation.getAngles(RotationOrder.YXZ);
-			return new float[] { (float)angles[1], (float)angles[0], (float)angles[2] };
+			return new float[] { (float) angles[1], (float) angles[0],
+					(float) angles[2] };
 		} catch (final CardanEulerSingularityException e) {
 		}
 		try {
 			final double[] angles = rotation.getAngles(RotationOrder.ZXY);
-			return new float[] { (float)angles[2], (float)angles[0], (float)angles[1] };
+			return new float[] { (float) angles[2], (float) angles[0],
+					(float) angles[1] };
 		} catch (final CardanEulerSingularityException e) {
 		}
 		return new float[] { 0, 0, 0 };
@@ -692,18 +764,17 @@ public class PeasyCam {
 	public class EdgeMonitor {
 		int left, right, top, bottom, xpos, ypos, ydelta, xdelta;
 		Point mouse;
-		boolean reverse;
 
 		/*
-		* Draw registration is needed as the MouseEvent for mouseChange does
-		* not detect mouse movement after the mouse leaves the frame space. We
-		* need to watch the outside of the frame to determine if the mouse goes
-		* beyond this area.
-		*/
+		 * Draw registration is needed as the MouseEvent for mouseChange does
+		 * not detect mouse movement after the mouse leaves the frame space. We
+		 * need to watch the outside of the frame to determine if the mouse goes
+		 * beyond this area.
+		 */
 
 		EdgeMonitor(boolean reverse) {
 			mouseIsOverSketch = true;
-			this.reverse = reverse;
+			setReversePan(reverse);
 			p.registerDraw(this);
 		}
 
@@ -760,10 +831,7 @@ public class PeasyCam {
 						} else if (mouse.y >= this.bottom) {
 							dy = 8;
 						}
-						if (reverse) {
-							dy = dy*-1;
-							dx = dx*-1;
-						}
+
 						panHandler.handleDrag(dx, dy);
 					}
 				}
@@ -789,10 +857,7 @@ public class PeasyCam {
 					} else if (mouseExit.y >= p.height - 1) {
 						dy = 8;
 					}
-					if (reverse) {
-						dy = dy*-1;
-						dx = dx*-1;
-					}
+
 					panHandler.handleDrag(dx, dy);
 				}
 			}
@@ -819,7 +884,7 @@ public class PeasyCam {
 			p.unregisterDraw(this);
 			this.stopped = true;
 		}
-		
+
 		boolean isStopped() {
 			return this.stopped;
 		}
@@ -846,8 +911,8 @@ public class PeasyCam {
 
 		public DistanceInterp(final double endDistance, final long timeInMillis) {
 			super(timeInMillis);
-			this.endDistance = Math.min(maximumDistance, Math.max(minimumDistance,
-					endDistance));
+			this.endDistance = Math.min(maximumDistance,
+					Math.max(minimumDistance, endDistance));
 		}
 
 		@Override
@@ -885,7 +950,8 @@ public class PeasyCam {
 		final Rotation startRotation = rotation;
 		final Rotation endRotation;
 
-		public RotationInterp(final Rotation endRotation, final long timeInMillis) {
+		public RotationInterp(final Rotation endRotation,
+				final long timeInMillis) {
 			super(timeInMillis);
 			this.endRotation = endRotation;
 		}
