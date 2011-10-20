@@ -49,7 +49,7 @@ public class PeasyCam {
 
 	private final double startDistance;
 	private final Vector3D startCenter;
-
+	private boolean andriod = false;
 	private boolean resetOnDoubleClick = true;
 	private EdgeMonitor edgepan;
 	private boolean mouseIsOverSketch;
@@ -120,7 +120,7 @@ public class PeasyCam {
 	private double panScale = 1.0;
 
 	private final PeasyMouseListener mouseListener = new PeasyMouseListener();
-	private final PeasyMousewheelListener mouseWheelListener = new PeasyMousewheelListener();
+	private PeasyMousewheelListener mouseWheelListener = null;
 	private boolean isActive = false;
 
 	private final PMatrix3D originalMatrix; // for HUD restore
@@ -143,6 +143,12 @@ public class PeasyCam {
 		this.startDistance = this.distance = distance;
 		this.rotation = new Rotation();
 		this.originalMatrix = parent.getMatrix((PMatrix3D) null);
+
+		andriod = System.getProperty("java.runtime.name").equalsIgnoreCase(
+				"android runtime");
+		if (!andriod) {
+			mouseWheelListener = new PeasyMousewheelListener();
+		}
 
 		feed();
 
@@ -212,12 +218,16 @@ public class PeasyCam {
 		isActive = active;
 		if (isActive) {
 			p.registerMouseEvent(mouseListener);
-			p.registerKeyEvent(mouseListener);
-			p.addMouseWheelListener(mouseWheelListener);
+			if (!andriod) {
+				p.registerKeyEvent(mouseListener);
+				p.addMouseWheelListener(mouseWheelListener);
+			}
 		} else {
 			p.unregisterMouseEvent(mouseListener);
-			p.unregisterKeyEvent(mouseListener);
-			p.removeMouseWheelListener(mouseWheelListener);
+			if (!andriod) {
+				p.unregisterKeyEvent(mouseListener);
+				p.removeMouseWheelListener(mouseWheelListener);
+			}
 		}
 	}
 
