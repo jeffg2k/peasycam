@@ -30,6 +30,8 @@ abstract public class DampedAction {
 	private final PeasyCam p;
 	private double velocity;
 	private double damping;
+	private double targetRate = 60;
+	private boolean targetlock = true;
 
 	public DampedAction(final PeasyCam p) {
 		this(p, 0.16);
@@ -45,9 +47,14 @@ abstract public class DampedAction {
 	public void impulse(final double impulse) {
 		/*
 		 * Preference would be to get p.getApplet().frameRateTarget instead of
-		 * 60. Submitted as issue 652 on Processing Code.
+		 * 60 Submitted as issue 652 on Processing Code.
 		 */
-		velocity += impulse * Math.max(1.0, 60 / p.getApplet().frameRate);
+		if (targetlock) {
+			velocity += impulse
+					* Math.max(1.0, targetRate / p.getApplet().frameRate);
+		} else {
+			velocity += impulse;
+		}
 	}
 
 	public void draw() {
@@ -72,6 +79,14 @@ abstract public class DampedAction {
 
 	public void setDamping(double damping) {
 		this.damping = damping;
+	}
+
+	public void setSpeedRate(double targetRate) {
+		this.targetRate = targetRate;
+	}
+
+	public void setSpeedLock(boolean lock) {
+		this.targetlock = lock;
 	}
 
 	abstract protected void behave(final double velocity);
