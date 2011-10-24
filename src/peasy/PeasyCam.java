@@ -210,6 +210,28 @@ public class PeasyCam {
 		dampedPanY.setDamping(Math.min(1, Math.max(0, pdamp)));
 		dampedPanX.setDamping(Math.min(1, Math.max(0, pdamp)));
 	}
+	
+	public void setSpeedLock(boolean framelock) {
+		// increases camera speed if framerate drops
+		// default is true
+		rotateX.setSpeedLock(framelock);
+		rotateY.setSpeedLock(framelock);
+		rotateZ.setSpeedLock(framelock);
+		dampedZoom.setSpeedLock(framelock);
+		dampedPanY.setSpeedLock(framelock);
+		dampedPanX.setSpeedLock(framelock);
+	}
+	
+	public void setSpeedRate(double targetRate) {
+		// sets the SpeedLock to the target FrameRate
+		// default is 60
+		rotateX.setSpeedRate(targetRate);
+		rotateY.setSpeedRate(targetRate);
+		rotateZ.setSpeedRate(targetRate);
+		dampedZoom.setSpeedRate(targetRate);
+		dampedPanY.setSpeedRate(targetRate);
+		dampedPanX.setSpeedRate(targetRate);
+	}
 
 	public void setActive(final boolean active) {
 		if (active == isActive) {
