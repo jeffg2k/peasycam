@@ -64,7 +64,7 @@ camera.setReversePan(boolean reverse); //reverses pan direction when true - defa
 camera.setReverseZoom(boolean reverse); //reverses zoom direction when true - default false
 camera.setReverseRotate(boolean reverse); //reverses rotate direction when true - default false
 camera.setSpeedLock(boolean lock); //increases camera speed if framerate drops - default true
-camera.setSpeedRate(doulbe frameRate); //sets the SpeedLock to the target FrameRate - default 60
+camera.setSpeedRate(double frameRate); //sets the SpeedLock to the target FrameRate - default 60
 
 //lookAt sets the center of the camera - rotate around the lookAt
 camera.lookAt(double x, double y, double z);
