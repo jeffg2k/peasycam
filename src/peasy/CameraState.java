@@ -27,9 +27,9 @@ import processing.core.PGraphics;
 
 public class CameraState implements Serializable {
 	private static final long serialVersionUID = 1L;
-	final Rotation rotation;
-	final Vector3D center;
-	final double distance;
+	public final Rotation rotation;
+	public final Vector3D center;
+	public final double distance;
 
 	public CameraState(final Rotation rotation, final Vector3D center,
 			final double distance) {
