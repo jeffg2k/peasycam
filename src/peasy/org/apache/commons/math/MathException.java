@@ -82,7 +82,7 @@ public class MathException extends Exception {
 	 * @return translated string or original string for unsupported locales or
 	 *         unknown strings
 	 */
-	private static String translate(final String s, final Locale locale) {
+	private synchronized static String translate(final String s, final Locale locale) {
 		try {
 			if ((cachedResources == null)
 					|| (!cachedResources.getLocale().equals(locale))) {
