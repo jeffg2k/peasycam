@@ -125,7 +125,7 @@ public class PeasyCam {
 
 	private final PMatrix3D originalMatrix; // for HUD restore
 
-	public final String VERSION = "101";
+	public static final String VERSION = "102";
 
 	public PeasyCam(final PApplet parent, final double distance) {
 		this(parent, 0, 0, 0, distance);
@@ -201,7 +201,7 @@ public class PeasyCam {
 		System.out.println("PeasyCam v" + VERSION);
 	}
 
-	public void setDamping(double rdamp, double zdamp, double pdamp) {
+	public void setDamping(final double rdamp, final double zdamp, final double pdamp) {
 		// default is .84,.84,.84
 		rotateX.setDamping(Math.min(1, Math.max(0, rdamp)));
 		rotateY.setDamping(Math.min(1, Math.max(0, rdamp)));
@@ -211,7 +211,7 @@ public class PeasyCam {
 		dampedPanX.setDamping(Math.min(1, Math.max(0, pdamp)));
 	}
 	
-	public void setSpeedLock(boolean framelock) {
+	public void setSpeedLock(final boolean framelock) {
 		// increases camera speed if framerate drops
 		// default is true
 		rotateX.setSpeedLock(framelock);
@@ -222,7 +222,7 @@ public class PeasyCam {
 		dampedPanX.setSpeedLock(framelock);
 	}
 	
-	public void setSpeedRate(double targetRate) {
+	public void setSpeedRate(final double targetRate) {
 		// sets the SpeedLock to the target FrameRate
 		// default is 60
 		rotateX.setSpeedRate(targetRate);
@@ -257,15 +257,15 @@ public class PeasyCam {
 		return isActive;
 	}
 
-	public void setReverseZoom(boolean reverse) {
+	public void setReverseZoom(final boolean reverse) {
 		reverseZoom = reverse;
 	}
 
-	public void setReverseRotate(boolean reverse) {
+	public void setReverseRotate(final boolean reverse) {
 		reverseRotate = reverse;
 	}
 
-	public void setReversePan(boolean reverse) {
+	public void setReversePan(final boolean reverse) {
 		reversePan = reverse;
 	}
 
@@ -316,7 +316,7 @@ public class PeasyCam {
 		return wheelScale;
 	}
 
-	public void setWheelScale(double wheelScale) {
+	public void setWheelScale(final double wheelScale) {
 		this.wheelScale = wheelScale;
 	}
 
@@ -360,7 +360,7 @@ public class PeasyCam {
 		return zoomScale;
 	}
 
-	public void setZoomScale(double zoomScale) {
+	public void setZoomScale(final double zoomScale) {
 		this.zoomScale = zoomScale;
 	}
 
@@ -368,7 +368,7 @@ public class PeasyCam {
 		return panScale;
 	}
 
-	public void setPanScale(double panScale) {
+	public void setPanScale(final double panScale) {
 		this.panScale = panScale;
 	}
 
@@ -376,7 +376,7 @@ public class PeasyCam {
 		return rotateScale;
 	}
 
-	public void setRotationScale(double rotateScale) {
+	public void setRotationScale(final double rotateScale) {
 		this.rotateScale = rotateScale;
 	}
 
@@ -547,14 +547,14 @@ public class PeasyCam {
 		CVY = CVY.normalize();
 		CVZ = CVZ.normalize();
 
-		Vector3D PV = new Vector3D(Vector3D.dotProduct(CVX, CamVector),
+		final Vector3D PV = new Vector3D(Vector3D.dotProduct(CVX, CamVector),
 				Vector3D.dotProduct(CVY, CamVector), Vector3D.dotProduct(CVZ,
 						CamVector));
 
-		double pitch = Math.atan2(CamVector.getZ(), CamVector.getY())
+		final double pitch = Math.atan2(CamVector.getZ(), CamVector.getY())
 				- (Math.PI * .5);
-		double yaw = Math.atan2(PV.getX(), PV.getY());
-		double roll = 0;
+		final double yaw = Math.atan2(PV.getX(), PV.getY());
+		final double roll = 0;
 
 		setDistance(distance, animationTimeMillis);
 		setRotations(pitch, yaw, roll, animationTimeMillis);
@@ -674,7 +674,7 @@ public class PeasyCam {
 	}
 
 	public double getVelocity() {
-		double[] maxvelocity = { rotateX.getVelocity(), rotateY.getVelocity(),
+		final double[] maxvelocity = { rotateX.getVelocity(), rotateY.getVelocity(),
 				rotateZ.getVelocity(), dampedZoom.getVelocity(),
 				dampedPanX.getVelocity(), dampedPanY.getVelocity() };
 
