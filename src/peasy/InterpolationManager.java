@@ -21,7 +21,7 @@ class InterpolationManager {
 		}
 	}
 
-	boolean isStopped() {
+	public boolean isStopped() {
 		if (currentInterpolator != null) {
 			return currentInterpolator.isStopped();
 		}
