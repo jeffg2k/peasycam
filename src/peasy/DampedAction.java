@@ -77,15 +77,15 @@ abstract public class DampedAction {
 		return velocity;
 	}
 
-	public void setDamping(double damping) {
+	public void setDamping(final double damping) {
 		this.damping = damping;
 	}
 
-	public void setSpeedRate(double targetRate) {
+	public void setSpeedRate(final double targetRate) {
 		this.targetRate = targetRate;
 	}
 
-	public void setSpeedLock(boolean lock) {
+	public void setSpeedLock(final boolean lock) {
 		this.targetlock = lock;
 	}
 
