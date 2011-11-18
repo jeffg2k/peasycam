@@ -201,6 +201,15 @@ PeasyCam(PApplet parent, double distance); // look at 0,0,0
 
 <h3>Methods</h3>
 <pre class="prettyprint">camera.setActive(boolean active);  // false to make this camera stop responding to mouse
+camera.setPanActive(boolean active);  //false to make the pan stop responding to mouse
+camera.setZoomActive(boolean active);  //false to make the zoom stop responding to mouse
+camera.setRotateActive(boolean active);  //false to make the rotate stop responding to mouse
+
+// returns if camera will respond to mouse
+camera.isActive();
+camera.isPanActive();
+camera.isZoomActive();
+camera.isRotateActive();
 
 // reassign particular drag gestures, or set them to null
 camera.setLeftDragHandler(PeasyDragHandler handler);
@@ -266,6 +275,9 @@ camera.setMinimumDistance(double minimumDistance);
 camera.setMaximumDistance(double maximumDistance);  // clamp zooming
 camera.getMinimumDistance();
 camera.getMaximumDistance();
+camera.setMaximumPanDistance(double maximumDistance);  // clamp panning  default to start look-at point
+camera.setMaximumPanDistance(double x, double y, double z, double maximumDistance);  specify pan center
+camera.getMaximumPanDistance();
 
 camera.reset();
 camera.reset(long animationTimeInMillis);  // reset camera to its starting settings

@@ -21,7 +21,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.awt.MouseInfo;
 import java.awt.Point;
 
 import peasy.org.apache.commons.math.geometry.CardanEulerSingularityException;
@@ -49,6 +48,7 @@ public class PeasyCam {
 
 	private final double startDistance;
 	private final Vector3D startCenter;
+	private Vector3D panCenter;
 	private boolean andriod = false;
 	private boolean resetOnDoubleClick = true;
 	private EdgeMonitor edgepan;
@@ -56,9 +56,14 @@ public class PeasyCam {
 	private boolean reversePan = false;
 	private boolean reverseZoom = false;
 	private boolean reverseRotate = false;
+	private boolean panActive = true;
+	private boolean zoomActive = true;
+	private boolean rotateActive = true;
+
 	private Point mouseExit;
 	private double minimumDistance = 1;
 	private double maximumDistance = Double.MAX_VALUE;
+	private double maximumPanDistance = Double.MAX_VALUE;
 
 	private final DampedAction rotateX, rotateY, rotateZ, dampedZoom,
 			dampedPanX, dampedPanY;
@@ -74,43 +79,51 @@ public class PeasyCam {
 
 	private final PeasyDragHandler panHandler /* ha ha ha */= new PeasyDragHandler() {
 		public void handleDrag(double dx, double dy) {
-			if (reversePan) {
-				dy = dy * -1;
-				dx = dx * -1;
+			if (panActive) {
+				if (reversePan) {
+					dy = dy * -1;
+					dx = dx * -1;
+				}
+				dampedPanX.impulse(panScale * dx / 8.);
+				dampedPanY.impulse(panScale * dy / 8.);
 			}
-			dampedPanX.impulse(panScale * dx / 8.);
-			dampedPanY.impulse(panScale * dy / 8.);
 		}
 	};
 	private PeasyDragHandler centerDragHandler = panHandler;
 
 	private final PeasyDragHandler rotateHandler = new PeasyDragHandler() {
 		public void handleDrag(double dx, double dy) {
-			if (reverseRotate) {
-				dy = dy * -1;
-				dx = dx * -1;
+			if (rotateActive) {
+				if (reverseRotate) {
+					dy = dy * -1;
+					dx = dx * -1;
+				}
+				mouseRotate(dx, dy);
 			}
-			mouseRotate(dx, dy);
 		}
 	};
 	private PeasyDragHandler leftDragHandler = rotateHandler;
 
 	private final PeasyDragHandler zoomHandler = new PeasyDragHandler() {
 		public void handleDrag(final double dx, double dy) {
-			if (reverseZoom) {
-				dy = dy * -1;
+			if (zoomActive) {
+				if (reverseZoom) {
+					dy = dy * -1;
+				}
+				dampedZoom.impulse(zoomScale * dy / 10.0);
 			}
-			dampedZoom.impulse(zoomScale * dy / 10.0);
 		}
 	};
 	private PeasyDragHandler rightDraghandler = zoomHandler;
 
 	private final PeasyWheelHandler zoomWheelHandler = new PeasyWheelHandler() {
 		public void handleWheel(int delta) {
-			if (reverseZoom) {
-				delta = delta * -1;
+			if (zoomActive) {
+				if (reverseZoom) {
+					delta = delta * -1;
+				}
+				dampedZoom.impulse(zoomScale * wheelScale * delta);
 			}
-			dampedZoom.impulse(zoomScale * wheelScale * delta);
 		}
 	};
 	private PeasyWheelHandler wheelHandler = zoomWheelHandler;
@@ -125,7 +138,7 @@ public class PeasyCam {
 
 	private final PMatrix3D originalMatrix; // for HUD restore
 
-	public static final String VERSION = "102";
+	public static final String VERSION = "103+";
 
 	public PeasyCam(final PApplet parent, final double distance) {
 		this(parent, 0, 0, 0, distance);
@@ -139,7 +152,8 @@ public class PeasyCam {
 	public PeasyCam(final PApplet parent, final double lookAtX,
 			final double lookAtY, final double lookAtZ, final double distance) {
 		this.p = parent;
-		this.startCenter = this.center = new Vector3D(lookAtX, lookAtY, lookAtZ);
+		this.startCenter = this.panCenter = this.center = new Vector3D(lookAtX,
+				lookAtY, lookAtZ);
 		this.startDistance = this.distance = distance;
 		this.rotation = new Rotation();
 		this.originalMatrix = parent.getMatrix((PMatrix3D) null);
@@ -201,7 +215,8 @@ public class PeasyCam {
 		System.out.println("PeasyCam v" + VERSION);
 	}
 
-	public void setDamping(final double rdamp, final double zdamp, final double pdamp) {
+	public void setDamping(final double rdamp, final double zdamp,
+			final double pdamp) {
 		// default is .84,.84,.84
 		rotateX.setDamping(Math.min(1, Math.max(0, rdamp)));
 		rotateY.setDamping(Math.min(1, Math.max(0, rdamp)));
@@ -210,7 +225,7 @@ public class PeasyCam {
 		dampedPanY.setDamping(Math.min(1, Math.max(0, pdamp)));
 		dampedPanX.setDamping(Math.min(1, Math.max(0, pdamp)));
 	}
-	
+
 	public void setSpeedLock(final boolean framelock) {
 		// increases camera speed if framerate drops
 		// default is true
@@ -221,7 +236,7 @@ public class PeasyCam {
 		dampedPanY.setSpeedLock(framelock);
 		dampedPanX.setSpeedLock(framelock);
 	}
-	
+
 	public void setSpeedRate(final double targetRate) {
 		// sets the SpeedLock to the target FrameRate
 		// default is 60
@@ -255,6 +270,30 @@ public class PeasyCam {
 
 	public boolean isActive() {
 		return isActive;
+	}
+
+	public boolean isPanActive() {
+		return isActive && panActive;
+	}
+
+	public boolean isZoomActive() {
+		return isActive && zoomActive;
+	}
+
+	public boolean isRotateActive() {
+		return isActive && rotateActive;
+	}
+
+	public void setPanActive(final boolean active) {
+		panActive = active;
+	}
+
+	public void setRotateActive(final boolean active) {
+		rotateActive = active;
+	}
+
+	public void setZoomActive(final boolean active) {
+		zoomActive = active;
 	}
 
 	public void setReverseZoom(final boolean reverse) {
@@ -308,6 +347,7 @@ public class PeasyCam {
 	 * @param isMouseControlled
 	 * @deprecated use {@link #setActive(boolean)}
 	 */
+	@Deprecated
 	public void setMouseControlled(final boolean isMouseControlled) {
 		setActive(isMouseControlled);
 	}
@@ -431,10 +471,10 @@ public class PeasyCam {
 					rightDraghandler.handleDrag(dx, dy);
 				}
 			} else if (e.getID() == MouseEvent.MOUSE_EXITED) {
-				mouseIsOverSketch = false;
+				setMouseOverSketch(false);
 				mouseExit = e.getPoint();
 			} else if (e.getID() == MouseEvent.MOUSE_ENTERED) {
-				mouseIsOverSketch = true;
+				setMouseOverSketch(true);
 			}
 		}
 	}
@@ -445,6 +485,7 @@ public class PeasyCam {
 
 	private void mousePan(final double dxMouse, final double dyMouse) {
 		final double panScale = Math.sqrt(distance * .005);
+
 		pan(dragConstraint == Constraint.Y ? 0 : -dxMouse * panScale,
 				dragConstraint == Constraint.X ? 0 : -dyMouse * panScale);
 	}
@@ -537,7 +578,7 @@ public class PeasyCam {
 	public void lookThrough(final double x, final double y, final double z,
 			final double distance, final long animationTimeMillis) {
 
-		Vector3D CamVector = new Vector3D(x, y, z);
+		final Vector3D CamVector = new Vector3D(x, y, z);
 
 		Vector3D CVY = new Vector3D(0, CamVector.getY(), CamVector.getZ());
 		Vector3D CVX = new Vector3D(1, 0, 0);
@@ -568,6 +609,14 @@ public class PeasyCam {
 
 	}
 
+	private Vector3D safePanDistance(final Vector3D newcenter) {
+		final double distanceToPanCenter = Vector3D.distance(newcenter, panCenter);
+		if (distanceToPanCenter >= this.maximumPanDistance) {
+			return center;
+		}
+		return newcenter;
+	}
+
 	public void feed() {
 		final Vector3D pos = rotation.applyTo(LOOK).scalarMultiply(distance)
 				.add(center);
@@ -580,7 +629,7 @@ public class PeasyCam {
 
 	}
 
-	static void apply(final PGraphics g, final Vector3D center,
+	public static void apply(final PGraphics g, final Vector3D center,
 			final Rotation rotation, final double distance) {
 		final Vector3D pos = rotation.applyTo(LOOK).scalarMultiply(distance)
 				.add(center);
@@ -615,7 +664,8 @@ public class PeasyCam {
 	}
 
 	public void pan(final double dx, final double dy) {
-		center = center.add(rotation.applyTo(new Vector3D(dx, dy, 0)));
+		center = safePanDistance(center.add(rotation.applyTo(new Vector3D(dx,
+				dy, 0))));
 		feed();
 	}
 
@@ -660,13 +710,28 @@ public class PeasyCam {
 		safeSetDistance(distance);
 	}
 
+	public void setMaximumPanDistance(final double maximumDistance) {
+		setMaximumPanDistance(startCenter.getX(), startCenter.getY(),
+				startCenter.getZ(), maximumDistance);
+	}
+
+	public void setMaximumPanDistance(final double x, final double y,
+			final double z, final double maximumDistance) {
+		this.maximumPanDistance = maximumDistance;
+		this.panCenter = new Vector3D(x, y, z);
+	}
+
+	public double getMaximumPanDistance() {
+		return maximumPanDistance;
+	}
+
 	public void setResetOnDoubleClick(final boolean resetOnDoubleClick) {
 		this.resetOnDoubleClick = resetOnDoubleClick;
 	}
 
 	public void setPanOnScreenEdge(final boolean panOnScreenEdge) {
 		if (panOnScreenEdge && edgepan == null) {
-			edgepan = new EdgeMonitor();
+			edgepan = new EdgeMonitor(p, this);
 		} else if (!panOnScreenEdge && edgepan != null) {
 			edgepan.cancel();
 			edgepan = null;
@@ -674,9 +739,10 @@ public class PeasyCam {
 	}
 
 	public double getVelocity() {
-		final double[] maxvelocity = { rotateX.getVelocity(), rotateY.getVelocity(),
-				rotateZ.getVelocity(), dampedZoom.getVelocity(),
-				dampedPanX.getVelocity(), dampedPanY.getVelocity() };
+		final double[] maxvelocity = { rotateX.getVelocity(),
+				rotateY.getVelocity(), rotateZ.getVelocity(),
+				dampedZoom.getVelocity(), dampedPanX.getVelocity(),
+				dampedPanY.getVelocity() };
 
 		double max = maxvelocity[0];
 		for (int i = 1; i < maxvelocity.length; ++i) {
@@ -788,106 +854,16 @@ public class PeasyCam {
 		p.popMatrix();
 	}
 
-	public class EdgeMonitor {
-		int left, right, top, bottom, xpos, ypos, ydelta, xdelta;
-		Point mouse;
+	public void setMouseOverSketch(boolean mouseIsOverSketch) {
+		this.mouseIsOverSketch = mouseIsOverSketch;
+	}
 
-		/*
-		 * Draw registration is needed as the MouseEvent for mouseChange does
-		 * not detect mouse movement after the mouse leaves the frame space. We
-		 * need to watch the outside of the frame to determine if the mouse goes
-		 * beyond this area.
-		 */
+	public boolean isMouseOverSketch() {
+		return mouseIsOverSketch;
+	}
 
-		EdgeMonitor() {
-			mouseIsOverSketch = true;
-			p.registerDraw(this);
-		}
-
-		void cancel() {
-			p.unregisterDraw(this);
-		}
-
-		public void draw() {
-
-			if (!p.online) {
-				/*
-				 * Only run if the frame has focus or is not visible (FullScreen
-				 * library)
-				 */
-				if (p.frame.isFocused() || !p.frame.isVisible()) {
-
-					this.mouse = MouseInfo.getPointerInfo().getLocation();
-
-					if (p.frame.isVisible()) {
-						this.xpos = p.frame.getBounds().x;
-						this.ypos = p.frame.getBounds().y;
-						if (p.frame.isUndecorated()) {
-							this.ydelta = (p.frame.getBounds().height - p.height) / 2;
-							this.xdelta = (p.frame.getBounds().width - p.width) / 2;
-						} else {
-							this.ydelta = p.frame.getBounds().height - p.height;
-							this.xdelta = p.frame.getBounds().width - p.width;
-						}
-					} else {
-						this.xpos = 0;
-						this.ypos = 0;
-						this.ydelta = 0;
-						this.xdelta = 0;
-					}
-
-					this.left = this.xpos + this.xdelta;
-					this.top = this.ypos + this.ydelta;
-					this.right = this.left + p.width - 1;
-					this.bottom = this.top + p.height - 1;
-
-					if (mouse.x <= this.left || mouse.x >= this.right
-							|| mouse.y <= this.top || mouse.y >= this.bottom) {
-
-						double dx = 0;
-						double dy = 0;
-
-						if (mouse.x <= this.left) {
-							dx = -8;
-						} else if (mouse.x >= this.right) {
-							dx = 8;
-						}
-						if (mouse.y <= this.top) {
-							dy = -8;
-						} else if (mouse.y >= this.bottom) {
-							dy = 8;
-						}
-
-						panHandler.handleDrag(dx, dy);
-					}
-				}
-			} else {
-				if (!mouseIsOverSketch) {
-
-					double dx = 0;
-					double dy = 0;
-
-					/*
-					 * Runs only if in applet and the mouse is off-screen.
-					 * mouseExit is more accurate than p.mouseX and p.mouseY for
-					 * the screen edge - attempt to determine exit location
-					 */
-
-					if (mouseExit.x <= 1) {
-						dx = -8;
-					} else if (mouseExit.x >= p.width - 1) {
-						dx = 8;
-					}
-					if (mouseExit.y <= 1) {
-						dy = -8;
-					} else if (mouseExit.y >= p.height - 1) {
-						dy = 8;
-					}
-
-					panHandler.handleDrag(dx, dy);
-				}
-			}
-		}
+	public Point getMouseExit() {
+		return mouseExit;
 	}
 
 	abstract public class AbstractInterp {

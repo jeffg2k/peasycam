@@ -437,6 +437,67 @@ public class Vector3D implements Serializable {
 		return new Vector3D(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x
 				* v2.y - v1.y * v2.x);
 	}
+	
+
+    /** Compute the distance between two vectors according to the L<sub>1</sub> norm.
+     * <p>Calling this method is equivalent to calling:
+     * <code>v1.subtract(v2).getNorm1()</code> except that no intermediate
+     * vector is built</p>
+     * @param v1 first vector
+     * @param v2 second vector
+     * @return the distance between v1 and v2 according to the L<sub>1</sub> norm
+     */
+    public static double distance1(Vector3D v1, Vector3D v2) {
+        final double dx = Math.abs(v2.x - v1.x);
+        final double dy = Math.abs(v2.y - v1.y);
+        final double dz = Math.abs(v2.z - v1.z);
+        return dx + dy + dz;
+    }
+
+    /** Compute the distance between two vectors according to the L<sub>2</sub> norm.
+     * <p>Calling this method is equivalent to calling:
+     * <code>v1.subtract(v2).getNorm()</code> except that no intermediate
+     * vector is built</p>
+     * @param v1 first vector
+     * @param v2 second vector
+     * @return the distance between v1 and v2 according to the L<sub>2</sub> norm
+     */
+    public static double distance(Vector3D v1, Vector3D v2) {
+        final double dx = v2.x - v1.x;
+        final double dy = v2.y - v1.y;
+        final double dz = v2.z - v1.z;
+        return Math.sqrt(dx * dx + dy * dy + dz * dz);
+    }
+
+    /** Compute the distance between two vectors according to the L<sub>&infin;</sub> norm.
+     * <p>Calling this method is equivalent to calling:
+     * <code>v1.subtract(v2).getNormInf()</code> except that no intermediate
+     * vector is built</p>
+     * @param v1 first vector
+     * @param v2 second vector
+     * @return the distance between v1 and v2 according to the L<sub>&infin;</sub> norm
+     */
+    public static double distanceInf(Vector3D v1, Vector3D v2) {
+        final double dx = Math.abs(v2.x - v1.x);
+        final double dy = Math.abs(v2.y - v1.y);
+        final double dz = Math.abs(v2.z - v1.z);
+        return Math.max(Math.max(dx, dy), dz);
+    }
+
+    /** Compute the square of the distance between two vectors.
+     * <p>Calling this method is equivalent to calling:
+     * <code>v1.subtract(v2).getNormSq()</code> except that no intermediate
+     * vector is built</p>
+     * @param v1 first vector
+     * @param v2 second vector
+     * @return the square of the distance between v1 and v2
+     */
+    public static double distanceSq(Vector3D v1, Vector3D v2) {
+        final double dx = v2.x - v1.x;
+        final double dy = v2.y - v1.y;
+        final double dz = v2.z - v1.z;
+        return dx * dx + dy * dy + dz * dz;
+    }
 
 	/** Abscissa. */
 	private final double x;

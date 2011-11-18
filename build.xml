@@ -4,7 +4,7 @@
        PeasyCam build
     </description>
 
-	<property name="processing" location="../processing-1.5.1" />
+	<property name="processing" location="../peasy" />
 	<property name="processingLibraries" location="../sketchbook/libraries" />
 
 	<property name="libraryClasspath" location="${processing}/lib" />
