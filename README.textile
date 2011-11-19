@@ -100,8 +100,7 @@ camera.setMinimumDistance(double minimumDistance);
 camera.setMaximumDistance(double maximumDistance);  // clamp zooming
 camera.getMinimumDistance();
 camera.getMaximumDistance();
-camera.setMaximumPanDistance(double maximumDistance);  // clamp panning  default to start look-at point
-camera.setMaximumPanDistance(double x, double y, double z, double maximumDistance);  specify pan center
+camera.setMaximumPanDistance(double maximumDistance);  // clamp panning
 camera.getMaximumPanDistance();
 
 camera.reset();

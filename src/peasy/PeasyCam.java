@@ -138,7 +138,7 @@ public class PeasyCam {
 
 	private final PMatrix3D originalMatrix; // for HUD restore
 
-	public static final String VERSION = "103+";
+	public static final String VERSION = "103.1+";
 
 	public PeasyCam(final PApplet parent, final double distance) {
 		this(parent, 0, 0, 0, distance);
@@ -227,8 +227,10 @@ public class PeasyCam {
 	}
 
 	public void setSpeedLock(final boolean framelock) {
-		// increases camera speed if framerate drops
-		// default is true
+		/**
+		* Increases camera speed if FrameRate drops
+		* Default is true
+		*/
 		rotateX.setSpeedLock(framelock);
 		rotateY.setSpeedLock(framelock);
 		rotateZ.setSpeedLock(framelock);
@@ -238,8 +240,10 @@ public class PeasyCam {
 	}
 
 	public void setSpeedRate(final double targetRate) {
-		// sets the SpeedLock to the target FrameRate
-		// default is 60
+		/**
+		* Sets the SpeedLock to the target FrameRate
+		* Default is 60
+		*/
 		rotateX.setSpeedRate(targetRate);
 		rotateY.setSpeedRate(targetRate);
 		rotateZ.setSpeedRate(targetRate);
@@ -542,6 +546,7 @@ public class PeasyCam {
 	public void lookAt(final double x, final double y, final double z) {
 		centerInterps.startInterpolation(new CenterInterp(
 				new Vector3D(x, y, z), 300));
+		this.panCenter = new Vector3D(x, y, z);
 	}
 
 	public void lookAt(final double x, final double y, final double z,
@@ -711,14 +716,7 @@ public class PeasyCam {
 	}
 
 	public void setMaximumPanDistance(final double maximumDistance) {
-		setMaximumPanDistance(startCenter.getX(), startCenter.getY(),
-				startCenter.getZ(), maximumDistance);
-	}
-
-	public void setMaximumPanDistance(final double x, final double y,
-			final double z, final double maximumDistance) {
 		this.maximumPanDistance = maximumDistance;
-		this.panCenter = new Vector3D(x, y, z);
 	}
 
 	public double getMaximumPanDistance() {

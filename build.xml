@@ -5,7 +5,7 @@
     </description>
 
 	<property name="processing" location="../peasy" />
-	<property name="processingLibraries" location="../sketchbook/libraries" />
+	<property name="processingLibraries" location="/Processing/libraries/" />
 
 	<property name="libraryClasspath" location="${processing}/lib" />
 	<path id="library-classpath">
