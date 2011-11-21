@@ -26,7 +26,7 @@
         <div id="menu" class="clear">
             <ul>
                 <li><a href="#about">About</a> \ </li>
-                <li><a href="#download">Download</a> \ </li>
+                <li><a href="##yourLibrary##_##versionNumber##.zip">Download</a> \ </li>
                 <li><a href="#download">Installation</a> \ </li>
                 <!-- <li><a href="#examples">Examples</a> \ </li>-->
                 <li><a href="#demos">Demo</a> \ </li>				
@@ -178,6 +178,7 @@ void setup() {
 <li><a href="http://imaginationfeed.com">A.W. Martin</a></li>
 <li><a href="http://prototy.blogspot.com/">Yiannis Chatzikonstantinou</a></li>
 <li><a href="http://milkbox.net/">Donald Ephraim Curtis</a></li>
+<li><a href="http://wiki.uelceca.net/msc0809/published/gennaro+senatore">Gennaro Senatore</a></li>
 </ul>
 <p>Please let me know if I've forgotten to acknowledge you.</p>
 
@@ -201,15 +202,19 @@ PeasyCam(PApplet parent, double distance); // look at 0,0,0
 
 <h3>Methods</h3>
 <pre class="prettyprint">camera.setActive(boolean active);  // false to make this camera stop responding to mouse
-camera.setPanActive(boolean active);  //false to make the pan stop responding to mouse
-camera.setZoomActive(boolean active);  //false to make the zoom stop responding to mouse
-camera.setRotateActive(boolean active);  //false to make the rotate stop responding to mouse
+
+// By default, the camera is in "free rotation" mode, but you can
+// constrain it to any axis, around the look-at point:
+camera.setYawRotationMode();   // like spinning a globe
+camera.setPitchRotationMode(); // like a somersault
+camera.setRollRotationMode();  // like a radio knob
+camera.setSuppressRollRotationMode();  // Permit pitch/yaw only.
+
+// Then you can set it back to its default mode:
+camera.setFreeRotationMode();
 
 // returns if camera will respond to mouse
 camera.isActive();
-camera.isPanActive();
-camera.isZoomActive();
-camera.isRotateActive();
 
 // reassign particular drag gestures, or set them to null
 camera.setLeftDragHandler(PeasyDragHandler handler);

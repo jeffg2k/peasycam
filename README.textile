@@ -26,15 +26,19 @@ PeasyCam(PApplet parent, double distance); // look at 0,0,0</pre>
 h3. Methods
 
 <pre>camera.setActive(boolean active);  // false to make this camera stop responding to mouse
-camera.setPanActive(boolean active);  //false to make the pan stop responding to mouse
-camera.setZoomActive(boolean active);  //false to make the zoom stop responding to mouse
-camera.setRotateActive(boolean active);  //false to make the rotate stop responding to mouse
 
 // returns if camera will respond to mouse
 camera.isActive();
-camera.isPanActive();
-camera.isZoomActive();
-camera.isRotateActive();
+
+// By default, the camera is in "free rotation" mode, but you can
+// constrain it to any axis, around the look-at point:
+camera.setYawRotationMode();   // like spinning a globe
+camera.setPitchRotationMode(); // like a somersault
+camera.setRollRotationMode();  // like a radio knob
+camera.setSuppressRollRotationMode();  // Permit pitch/yaw only.
+
+// Then you can set it back to its default mode:
+camera.setFreeRotationMode();
 
 // reassign particular drag gestures, or set them to null
 camera.setLeftDragHandler(PeasyDragHandler handler);
@@ -127,4 +131,4 @@ PeasyCam is impervious to gimbal lock, and has no known "singularities" or disco
 
 h3. Contributors
 
-Thanks: "Michael Kaufmann":http://www.michael-kaufmann.ch/, "Oori Shalev":http://ooish.com/, Jeffrey Gentes, "A.W. Martin":http://imaginationfeed.com, "Yiannis Chatzikonstantinou":http://prototy.blogspot.com/, and "Donald Ephraim Curtis":http://milkbox.net/ for bug reports and feature suggestions.
+Thanks: "Gennaro Senatore":http://wiki.uelceca.net/msc0809/published/gennaro+senatore, "Michael Kaufmann":http://www.michael-kaufmann.ch/, "Oori Shalev":http://ooish.com/, Jeffrey Gentes, "A.W. Martin":http://imaginationfeed.com, "Yiannis Chatzikonstantinou":http://prototy.blogspot.com/, and "Donald Ephraim Curtis":http://milkbox.net/ for bug reports and feature suggestions.
