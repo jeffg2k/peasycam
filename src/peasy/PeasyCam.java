@@ -41,7 +41,7 @@ public class PeasyCam {
 	private static final Vector3D UP = Vector3D.plusJ;
 
 	private static enum Constraint {
-		YAW, PITCH, ROLL, SUPPRESS_ROLL
+		YAW, PITCH, ROLL, SUPPRESS_ROLL, SUPPRESS_YAW, SUPPRESS_PITCH
 	}
 
 	private final PApplet p;
@@ -468,18 +468,22 @@ public class PeasyCam {
 		final double rho = Math.abs((p.width / 2d) - p.mouseX) / (p.width / 2d);
 
 		if (dragConstraint == null || dragConstraint == Constraint.YAW
-				|| dragConstraint == Constraint.SUPPRESS_ROLL) {
+				|| dragConstraint == Constraint.SUPPRESS_ROLL
+				|| dragConstraint == Constraint.SUPPRESS_PITCH) {
 			final double adx = Math.abs(dx) * (1 - eccentricity);
 			final Vector3D vx = u.add(new Vector3D(adx, 0, 0));
 			rotateY.impulse(Vector3D.angle(u, vx) * xSign);
 		}
 		if (dragConstraint == null || dragConstraint == Constraint.PITCH
-				|| dragConstraint == Constraint.SUPPRESS_ROLL) {
+				|| dragConstraint == Constraint.SUPPRESS_ROLL
+				|| dragConstraint == Constraint.SUPPRESS_YAW) {
 			final double ady = Math.abs(dy) * (1 - rho);
 			final Vector3D vy = u.add(new Vector3D(0, ady, 0));
 			rotateX.impulse(Vector3D.angle(u, vy) * ySign);
 		}
-		if (dragConstraint == null || dragConstraint == Constraint.ROLL) {
+		if (dragConstraint == null || dragConstraint == Constraint.ROLL
+				|| dragConstraint == Constraint.SUPPRESS_YAW
+				|| dragConstraint == Constraint.SUPPRESS_PITCH) {
 			{
 				final double adz = Math.abs(dy) * rho;
 				final Vector3D vz = u.add(new Vector3D(0, adz, 0));
@@ -688,6 +692,20 @@ public class PeasyCam {
 	 */
 	public void setSuppressRollRotationMode() {
 		permaConstraint = Constraint.SUPPRESS_ROLL;
+	}
+	
+	/**
+	 * Only suppress yaw.
+	 */
+	public void setSuppressYawRotationMode() {
+		permaConstraint = Constraint.SUPPRESS_YAW;
+	}
+	
+	/**
+	 * Only suppress pitch.
+	 */
+	public void setSuppressPitchRotationMode() {
+		permaConstraint = Constraint.SUPPRESS_PITCH;
 	}
 
 	public double getMinimumDistance() {
