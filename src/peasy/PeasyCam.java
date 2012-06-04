@@ -343,16 +343,16 @@ public class PeasyCam {
 	}
 	
 	public PeasyDragHandler getLeftDragHandler() {
-        	return leftDragHandler;
-    	}
+        return leftDragHandler;
+    }
     
-    	public PeasyDragHandler getCenterDragHandler() {
-        	return centerDragHandler;
-    	}
+    public PeasyDragHandler getCenterDragHandler() {
+        return centerDragHandler;
+    }
     
-    	public PeasyDragHandler getRightDraghandler() {
-        	return rightDraghandler;
-    	}
+    public PeasyDragHandler getRightDraghandler() {
+        return rightDraghandler;
+    }
 
 	public void setLeftDragHandler(final PeasyDragHandler handler) {
 		leftDragHandler = handler;
@@ -772,6 +772,18 @@ public class PeasyCam {
 		}
 		return max;
 	}
+	
+	public void stop() {
+        rotateX.stop();
+        rotateY.stop();
+        rotateZ.stop();
+        dampedPanX.stop();
+        dampedPanY.stop();
+        dampedZoom.stop();
+        distanceInterps.cancelInterpolation();
+        rotationInterps.cancelInterpolation();
+        centerInterps.cancelInterpolation();
+    }
 
 	public boolean isMoving() {
 		if (rotateX.getVelocity() == 0 && rotateY.getVelocity() == 0

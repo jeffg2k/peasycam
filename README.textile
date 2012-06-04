@@ -116,6 +116,7 @@ camera.reset();
 camera.reset(long animationTimeInMillis);  // reset camera to its starting settings
 
 camera.isMoving();  // returns true or false
+camera.stop(); // stops all camera damping and movement
 
 CameraState state = camera.getState(); // get a serializable settings object for current state
 camera.setState(CameraState state);
