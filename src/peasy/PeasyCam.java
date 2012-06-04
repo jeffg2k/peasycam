@@ -341,6 +341,18 @@ public class PeasyCam {
 	public PeasyWheelHandler getZoomWheelHandler() {
 		return zoomWheelHandler;
 	}
+	
+	public PeasyDragHandler getLeftDragHandler() {
+        	return leftDragHandler;
+    	}
+    
+    	public PeasyDragHandler getCenterDragHandler() {
+        	return centerDragHandler;
+    	}
+    
+    	public PeasyDragHandler getRightDraghandler() {
+        	return rightDraghandler;
+    	}
 
 	public void setLeftDragHandler(final PeasyDragHandler handler) {
 		leftDragHandler = handler;
