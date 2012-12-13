@@ -24,6 +24,7 @@ h3. Constructors
 PeasyCam(PApplet parent, double distance); // look at 0,0,0</blockquote>
 
 h3. Methods
+
 *_Bold methods indicate expanded functionality added in PeasyCam+_*
 
 <blockquote>camera.setActive(boolean active);  // false to make this camera stop responding to mouse
