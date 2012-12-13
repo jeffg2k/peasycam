@@ -1,6 +1,6 @@
-PeasyCam provides a dead-simple mouse-driven camera for Processing. It is created and maintained by "Jonathan Feinberg":http://mrfeinberg.com/. It is free for all uses, per the Apache 2.0 license.
+PeasyCam+ extends the dead-simple mouse-driven camera for Processing created and maintained by "Jonathan Feinberg":http://mrfeinberg.com/. It is free for all uses, per the Apache 2.0 license.
 
-To download the distribution, and to see a demo, go to "the PeasyCam home page":http://mrfeinberg.com/peasycam/.
+To download the original distribution, and to see a demo, go to "the PeasyCam home page":http://mrfeinberg.com/peasycam/.
 
 h3. Example
 
@@ -24,11 +24,12 @@ h3. Constructors
 PeasyCam(PApplet parent, double distance); // look at 0,0,0</pre>
 
 h3. Methods
+*_Bold methods indicate expanded functionality added in PeasyCam+_*
 
 <pre>camera.setActive(boolean active);  // false to make this camera stop responding to mouse
 
 // returns if camera will respond to mouse
-camera.isActive();
+*camera.isActive();*
 
 // By default, the camera is in "free rotation" mode, but you can
 // constrain it to any axis, around the look-at point:
@@ -36,8 +37,8 @@ camera.setYawRotationMode();   // like spinning a globe
 camera.setPitchRotationMode(); // like a somersault
 camera.setRollRotationMode();  // like a radio knob
 camera.setSuppressRollRotationMode();  // Permit pitch/yaw only.
-camera.setSuppressYawRotationMode();  // Permit pitch/roll only.
-camera.setSuppressPitchRotationMode();  // Permit roll/yaw only.
+*camera.setSuppressYawRotationMode();  // Permit pitch/roll only.*
+*camera.setSuppressPitchRotationMode();  // Permit roll/yaw only.*
 
 // Then you can set it back to its default mode:
 camera.setFreeRotationMode();
@@ -46,9 +47,9 @@ camera.setFreeRotationMode();
 camera.setLeftDragHandler(PeasyDragHandler handler);
 camera.setCenterDragHandler(PeasyDragHandler handler);
 camera.setRightDragHandler(PeasyDragHandler handler);
-PeasyDragHandler getLeftDragHandler();
-PeasyDragHandler getCenterDragHandler();
-PeasyDragHandler getRightDragHandler();
+*PeasyDragHandler getLeftDragHandler();*
+*PeasyDragHandler getCenterDragHandler();*
+*PeasyDragHandler getRightDragHandler();*
 PeasyDragHandler getPanDragHandler();
 PeasyDragHandler getRotateDragHandler();
 PeasyDragHandler getZoomDragHandler();
@@ -59,13 +60,13 @@ PeasyWheelHandler getZoomWheelHandler();
 
 // change sensitivity of built-in mouse controls
 camera.setWheelScale(double scale); // 1.0 by default
-camera.setZoomScale(double scale); // 1.0 by default
-camera.setRotationScale(double scale); // 1.0 by default
-camera.setPanScale(double scale); // 1.0 by default
+*camera.setZoomScale(double scale); // 1.0 by default*
+*camera.setRotationScale(double scale); // 1.0 by default*
+*camera.setPanScale(double scale); // 1.0 by default*
 double getWheelScale();
-double getZoomScale();
-double getRotationScale();
-double getPanScale();
+*double getZoomScale();*
+*double getRotationScale();*
+*double getPanScale();*
 
 // make your own!
 public interface PeasyDragHandler {
@@ -75,14 +76,14 @@ public interface PeasyWheelHandler {
 	public void handleWheel(final int delta);
 }
 
-camera.setDamping(double rotate, double zoom, double pan); // default .84,.84,.84
+*camera.setDamping(double rotate, double zoom, double pan); // default .84,.84,.84*
 camera.setResetOnDoubleClick(boolean resetOnDoubleClick); // default true
-camera.setPanOnScreenEdge(boolean panOnScreenEdge); //pans when mouse touches screen edge - default false
-camera.setReversePan(boolean reverse); //reverses pan direction when true - default false
-camera.setReverseZoom(boolean reverse); //reverses zoom direction when true - default false
-camera.setReverseRotate(boolean reverse); //reverses rotate direction when true - default false
-camera.setSpeedLock(boolean lock); //increases camera speed if framerate drops - default true
-camera.setSpeedRate(double frameRate); //sets the SpeedLock to the target FrameRate - default 60
+*camera.setPanOnScreenEdge(boolean panOnScreenEdge); //pans when mouse touches screen edge - default false*
+*camera.setReversePan(boolean reverse); //reverses pan direction when true - default false*
+*camera.setReverseZoom(boolean reverse); //reverses zoom direction when true - default false*
+*camera.setReverseRotate(boolean reverse); //reverses rotate direction when true - default false*
+*camera.setSpeedLock(boolean lock); //increases camera speed if framerate drops - default true*
+*camera.setSpeedRate(double frameRate); //sets the SpeedLock to the target FrameRate - default 60*
 
 //lookAt sets the center of the camera - rotate around the lookAt
 camera.lookAt(double x, double y, double z);
@@ -91,10 +92,10 @@ camera.lookAt(double x, double y, double z, double distance);
 camera.lookAt(double x, double y, double z, double distance, long animationTimeInMillis);
 
 //lookThrough rotates the camera to look through a point at the lookAt
-camera.lookThrough(double x, double y, double z);
-camera.lookThrough(double x, double y, double z, long animationTimeInMillis);
-camera.lookThrough(double x, double y, double z, double distance);
-camera.lookThrough(double x, double y, double z, double distance, long animationTimeInMillis);
+*camera.lookThrough(double x, double y, double z);*
+*camera.lookThrough(double x, double y, double z, long animationTimeInMillis);*
+*camera.lookThrough(double x, double y, double z, double distance);*
+*camera.lookThrough(double x, double y, double z, double distance, long animationTimeInMillis);*
 
 camera.rotateX(double angle);  // rotate around the x-axis passing through the subject
 camera.rotateY(double angle);  // rotate around the y-axis passing through the subject
@@ -107,16 +108,16 @@ float[] camera.getLookAt();  // float[] { x, y, z }, looked-at point
 
 camera.setMinimumDistance(double minimumDistance);
 camera.setMaximumDistance(double maximumDistance);  // clamp zooming
-camera.getMinimumDistance();
-camera.getMaximumDistance();
-camera.setMaximumPanDistance(double maximumDistance);  // clamp panning
-camera.getMaximumPanDistance();
+*camera.getMinimumDistance();*
+*camera.getMaximumDistance();*
+*camera.setMaximumPanDistance(double maximumDistance);  // clamp panning*
+*camera.getMaximumPanDistance();*
 
 camera.reset();
 camera.reset(long animationTimeInMillis);  // reset camera to its starting settings
 
-camera.isMoving();  // returns true or false
-camera.stop(); // stops all camera damping and movement
+*camera.isMoving();  // returns true or false*
+*camera.stop(); // stops all camera damping and movement*
 
 CameraState state = camera.getState(); // get a serializable settings object for current state
 camera.setState(CameraState state);
@@ -124,11 +125,10 @@ camera.setState(CameraState state, long animationTimeInMillis); // set the camer
 
 float[] rotations = camera.getRotations(); // x, y, and z rotations required to face camera in model space
 camera.setRotations(double pitch, double yaw, double roll); // rotations are applied in that order
-camera.setRotations(double pitch, double yaw, double roll, long animationTimeInMillis);
+*camera.setRotations(double pitch, double yaw, double roll, long animationTimeInMillis);*
 float[] position = camera.getPosition(); // x, y, and z coordinates of camera in model space
 
 // Utility methods to permit the use of a Heads-Up Display
-// Thanks, A.W. Martin
 camera.beginHUD();
 // now draw things that you want relative to the camera's position and orientation
 camera.endHUD(); // always!</pre>
