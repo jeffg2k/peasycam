@@ -10,6 +10,7 @@ public class EdgeMonitor {
 	Point mouse;
 	final PeasyCam cam;
 	final PApplet p;
+	boolean online;
 
 	/*
 	 * Draw registration is needed as the MouseEvent for mouseChange does
@@ -21,17 +22,23 @@ public class EdgeMonitor {
 	EdgeMonitor(final PApplet p, final PeasyCam cam) {
 		this.p = p;
 		this.cam = cam;
+		 try {
+			 p.getAppletContext();
+			 online = true;
+		} catch (NullPointerException e) {
+			 online = false;
+		}
 		cam.setMouseOverSketch(true);
-		p.registerDraw(this);
+		p.registerMethod("draw", this);
 	}
 
 	void cancel() {
-		p.unregisterDraw(this);
+		p.unregisterMethod("draw", this);
 	}
 
 	public void draw() {
 
-		if (!p.online) {
+		if (!online) {
 			/*
 			 * Only run if the frame has focus or is not visible (FullScreen
 			 * library)

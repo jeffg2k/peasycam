@@ -17,8 +17,10 @@ limitations under the License.
  */
 package peasy;
 
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
+import processing.event.KeyEvent;
+import processing.event.MouseEvent;
+import processing.event.TouchEvent;
+
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.Point;
@@ -128,7 +130,7 @@ public class PeasyCam {
 
 	private final PMatrix3D originalMatrix; // for HUD restore
 
-	public static final String VERSION = "105+";
+	public static final String VERSION = "2.0.0+";
 
 	public PeasyCam(final PApplet parent, final double distance) {
 		this(parent, 0, 0, 0, distance);
@@ -244,16 +246,20 @@ public class PeasyCam {
 		}
 		isActive = active;
 		if (isActive) {
-			p.registerMouseEvent(mouseListener);
 			if (!andriod) {
-				p.registerKeyEvent(mouseListener);
+				p.registerMethod("mouseEvent", mouseListener);
+				p.registerMethod("keyEvent", mouseListener);
 				p.addMouseWheelListener(mouseWheelListener);
+			} else {
+				p.registerMethod("touchEvent", mouseListener);
 			}
 		} else {
-			p.unregisterMouseEvent(mouseListener);
 			if (!andriod) {
-				p.unregisterKeyEvent(mouseListener);
+				p.unregisterMethod("mouseEvent", mouseListener);
+				p.unregisterMethod("keyEvent", mouseListener);
 				p.removeMouseWheelListener(mouseWheelListener);
+			} else {
+				p.unregisterMethod("touchEvent", mouseListener);
 			}
 		}
 	}
@@ -402,7 +408,7 @@ public class PeasyCam {
 		return VERSION;
 	}
 
-	protected class PeasyMousewheelListener implements MouseWheelListener {
+	public class PeasyMousewheelListener implements MouseWheelListener {
 		public void mouseWheelMoved(final MouseWheelEvent e) {
 			if (wheelHandler != null) {
 				wheelHandler.handleWheel(e.getWheelRotation());
@@ -410,21 +416,26 @@ public class PeasyCam {
 		}
 	}
 
-	protected class PeasyMouseListener {
+	public class PeasyMouseListener {
 		public void keyEvent(final KeyEvent e) {
-			if (e.getID() == KeyEvent.KEY_RELEASED && e.getKeyCode() == KeyEvent.VK_SHIFT) {
+			if (e.getAction() == KeyEvent.RELEASE && e.getKeyCode() == KeyEvent.SHIFT) {
 				dragConstraint = null;
+			}
+		}
+		
+		public void touchEvent(final TouchEvent e) {
+			if (e.getAction() == 0) {
+				//Example
 			}
 		}
 
 		public void mouseEvent(final MouseEvent e) {
-
-			if (resetOnDoubleClick && e.getID() == MouseEvent.MOUSE_CLICKED
+			if (resetOnDoubleClick && e.getAction() == MouseEvent.CLICK
 					&& e.getClickCount() == 2) {
 				reset();
-			} else if (e.getID() == MouseEvent.MOUSE_RELEASED) {
+			} else if (e.getAction() == MouseEvent.RELEASE) {
 				dragConstraint = null;
-			} else if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
+			} else if (e.getAction() == MouseEvent.DRAG) {
 				final double dx = p.mouseX - p.pmouseX;
 				final double dy = p.mouseY - p.pmouseY;
 
@@ -449,10 +460,10 @@ public class PeasyCam {
 				} else if (rightDraghandler != null && b == PConstants.RIGHT) {
 					rightDraghandler.handleDrag(dx, dy);
 				}
-			} else if (e.getID() == MouseEvent.MOUSE_EXITED) {
+			} else if (e.getAction() == MouseEvent.EXIT) {
 				setMouseOverSketch(false);
-				mouseExit = e.getPoint();
-			} else if (e.getID() == MouseEvent.MOUSE_ENTERED) {
+				mouseExit = new Point(e.getX(),e.getY());
+			} else if (e.getAction() == MouseEvent.ENTER) {
 				setMouseOverSketch(true);
 			}
 		}
@@ -906,12 +917,12 @@ public class PeasyCam {
 
 		void start() {
 			startTime = p.millis();
-			p.registerDraw(this);
+			p.registerMethod("draw", this);
 			this.stopped = false;
 		}
 
 		void cancel() {
-			p.unregisterDraw(this);
+			p.unregisterMethod("draw", this);
 			this.stopped = true;
 		}
 
