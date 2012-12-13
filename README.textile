@@ -77,8 +77,8 @@ public interface PeasyWheelHandler {
 	public void handleWheel(final int delta);
 }
 
-*camera.setDamping(double rotate, double zoom, double pan); // default .84,.84,.84*
 camera.setResetOnDoubleClick(boolean resetOnDoubleClick); // default true
+*camera.setDamping(double rotate, double zoom, double pan); // default .84,.84,.84*
 *camera.setPanOnScreenEdge(boolean panOnScreenEdge); //pans when mouse touches screen edge - default false*
 *camera.setReversePan(boolean reverse); //reverses pan direction when true - default false*
 *camera.setReverseZoom(boolean reverse); //reverses zoom direction when true - default false*
