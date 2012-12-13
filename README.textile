@@ -20,13 +20,13 @@ The PeasyCam is positioned on a sphere whose radius is the given distance from t
 
 h3. Constructors
 
-<pre>PeasyCam(PApplet parent, double lookAtX, double lookAtY, double lookAtZ, double distance);
-PeasyCam(PApplet parent, double distance); // look at 0,0,0</pre>
+<blockquote>PeasyCam(PApplet parent, double lookAtX, double lookAtY, double lookAtZ, double distance);
+PeasyCam(PApplet parent, double distance); // look at 0,0,0</blockquote>
 
 h3. Methods
 *_Bold methods indicate expanded functionality added in PeasyCam+_*
 
-<pre>camera.setActive(boolean active);  // false to make this camera stop responding to mouse
+<blockquote>camera.setActive(boolean active);  // false to make this camera stop responding to mouse
 
 // returns if camera will respond to mouse
 *camera.isActive();*
@@ -131,7 +131,7 @@ float[] position = camera.getPosition(); // x, y, and z coordinates of camera in
 // Utility methods to permit the use of a Heads-Up Display
 camera.beginHUD();
 // now draw things that you want relative to the camera's position and orientation
-camera.endHUD(); // always!</pre>
+camera.endHUD(); // always!</blockquote>
 
 PeasyCam is impervious to gimbal lock, and has no known "singularities" or discontinuities in its behavior. It relies on the excellent "Apache Commons Math":http://commons.apache.org/math/ "geometry package":http://commons.apache.org/math/userguide/geometry.html for its rotations.
 
