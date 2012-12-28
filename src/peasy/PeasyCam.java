@@ -21,6 +21,8 @@ import processing.event.KeyEvent;
 import processing.event.MouseEvent;
 import processing.event.TouchEvent;
 
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.Point;
@@ -199,6 +201,12 @@ public class PeasyCam {
 				mousePan(0, velocity);
 			}
 		};
+		
+		p.addComponentListener(new ComponentAdapter() {
+		      public void componentResized(ComponentEvent e) {
+		        setState(new CameraState(rotation, center, distance), 0);
+		      }
+		    });
 
 		setActive(true);
 		System.out.println("PeasyCam v" + VERSION);
