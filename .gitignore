@@ -1,7 +1,11 @@
 PeasyCam.jar
-distribution
+distribution/peasycam/*
+distribution/peasycam_*
+distribution/web/*
 bin
 examples/*/applet
 web/peasycam.jar
 reference
 *.swp
+.idea*
+*.iml

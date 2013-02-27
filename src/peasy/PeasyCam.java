@@ -17,16 +17,6 @@ limitations under the License.
  */
 package peasy;
 
-import processing.event.KeyEvent;
-import processing.event.MouseEvent;
-import processing.event.TouchEvent;
-
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
-import java.awt.Point;
-
 import peasy.org.apache.commons.math.geometry.CardanEulerSingularityException;
 import peasy.org.apache.commons.math.geometry.Rotation;
 import peasy.org.apache.commons.math.geometry.RotationOrder;
@@ -35,6 +25,14 @@ import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PGraphics;
 import processing.core.PMatrix3D;
+import processing.event.KeyEvent;
+import processing.event.MouseEvent;
+import processing.event.TouchEvent;
+
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.Point;
+
 
 /**
  * 
@@ -113,7 +111,7 @@ public class PeasyCam {
 	private PeasyDragHandler rightDraghandler = zoomHandler;
 
 	private final PeasyWheelHandler zoomWheelHandler = new PeasyWheelHandler() {
-		public void handleWheel(int delta) {
+		public void handleWheel(float delta) {
 			if (reverseZoom) {
 				delta = delta * -1;
 			}
@@ -127,7 +125,6 @@ public class PeasyCam {
 	private double panScale = 1.0;
 
 	private final PeasyMouseListener mouseListener = new PeasyMouseListener();
-	private PeasyMousewheelListener mouseWheelListener = null;
 	private boolean isActive = false;
 
 	private final PMatrix3D originalMatrix; // for HUD restore
@@ -154,10 +151,6 @@ public class PeasyCam {
 
 		andriod = System.getProperty("java.runtime.name").equalsIgnoreCase(
 				"android runtime");
-		if (!andriod) {
-			mouseWheelListener = new PeasyMousewheelListener();
-		}
-
 		feed();
 
 		rotateX = new DampedAction(this) {
@@ -201,12 +194,12 @@ public class PeasyCam {
 				mousePan(0, velocity);
 			}
 		};
-		
-		p.addComponentListener(new ComponentAdapter() {
-		      public void componentResized(ComponentEvent e) {
-		        setState(new CameraState(rotation, center, distance), 0);
-		      }
-		    });
+
+        p.addComponentListener(new ComponentAdapter() {
+            public void componentResized(ComponentEvent e) {
+                setState(new CameraState(rotation, center, distance), 0);
+            }
+        });
 
 		setActive(true);
 		System.out.println("PeasyCam v" + VERSION);
@@ -254,20 +247,14 @@ public class PeasyCam {
 		}
 		isActive = active;
 		if (isActive) {
+            p.registerMethod("mouseEvent", mouseListener);
 			if (!andriod) {
-				p.registerMethod("mouseEvent", mouseListener);
 				p.registerMethod("keyEvent", mouseListener);
-				p.addMouseWheelListener(mouseWheelListener);
-			} else {
-				p.registerMethod("touchEvent", mouseListener);
 			}
 		} else {
+            p.unregisterMethod("mouseEvent", mouseListener);
 			if (!andriod) {
-				p.unregisterMethod("mouseEvent", mouseListener);
 				p.unregisterMethod("keyEvent", mouseListener);
-				p.removeMouseWheelListener(mouseWheelListener);
-			} else {
-				p.unregisterMethod("touchEvent", mouseListener);
 			}
 		}
 	}
@@ -416,14 +403,6 @@ public class PeasyCam {
 		return VERSION;
 	}
 
-	public class PeasyMousewheelListener implements MouseWheelListener {
-		public void mouseWheelMoved(final MouseWheelEvent e) {
-			if (wheelHandler != null) {
-				wheelHandler.handleWheel(e.getWheelRotation());
-			}
-		}
-	}
-
 	public class PeasyMouseListener {
 		public void keyEvent(final KeyEvent e) {
 			if (e.getAction() == KeyEvent.RELEASE && e.getKeyCode() == KeyEvent.SHIFT) {
@@ -473,8 +452,10 @@ public class PeasyCam {
 				mouseExit = new Point(e.getX(),e.getY());
 			} else if (e.getAction() == MouseEvent.ENTER) {
 				setMouseOverSketch(true);
-			}
-		}
+			} else if (e.getAction() == MouseEvent.WHEEL) {
+                wheelHandler.handleWheel(e.getAmount());
+            }
+        }
 	}
 
 	private void mouseZoom(final double delta) {
@@ -805,16 +786,12 @@ public class PeasyCam {
     }
 
 	public boolean isMoving() {
-		if (rotateX.getVelocity() == 0 && rotateY.getVelocity() == 0
-				&& rotateZ.getVelocity() == 0 && dampedZoom.getVelocity() == 0
-				&& dampedPanX.getVelocity() == 0 && dampedPanY.getVelocity() == 0
-				&& distanceInterps.isStopped() && centerInterps.isStopped()
-				&& rotationInterps.isStopped()) {
-			return false;
-		}
-
-		return true;
-	}
+        return !(rotateX.getVelocity() == 0 && rotateY.getVelocity() == 0
+                && rotateZ.getVelocity() == 0 && dampedZoom.getVelocity() == 0
+                && dampedPanX.getVelocity() == 0 && dampedPanY.getVelocity() == 0
+                && distanceInterps.isStopped() && centerInterps.isStopped()
+                && rotationInterps.isStopped());
+    }
 
 	public void setState(final CameraState state) {
 		setState(state, 300);
