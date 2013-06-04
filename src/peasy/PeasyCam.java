@@ -58,6 +58,7 @@ public class PeasyCam {
 	private boolean reversePan = false;
 	private boolean reverseZoom = false;
 	private boolean reverseRotate = false;
+	private double sketchSize;
 
 	private Point mouseExit;
 	private double minimumDistance = 1;
@@ -111,7 +112,7 @@ public class PeasyCam {
 	private PeasyDragHandler rightDraghandler = zoomHandler;
 
 	private final PeasyWheelHandler zoomWheelHandler = new PeasyWheelHandler() {
-		public void handleWheel(float delta) {
+		public void handleWheel(int delta) {
 			if (reverseZoom) {
 				delta = delta * -1;
 			}
@@ -148,7 +149,7 @@ public class PeasyCam {
 		this.startDistance = this.distance = distance;
 		this.rotation = new Rotation();
 		this.originalMatrix = parent.getMatrix((PMatrix3D)null);
-
+		this.sketchSize = Math.sqrt((p.width * p.width) + (p.height * p.height));
 		andriod = System.getProperty("java.runtime.name").equalsIgnoreCase(
 				"android runtime");
 		feed();
@@ -197,7 +198,11 @@ public class PeasyCam {
 
         p.addComponentListener(new ComponentAdapter() {
             public void componentResized(ComponentEvent e) {
-                setState(new CameraState(rotation, center, distance), 0);
+            	// Reset camera and attempt to set a proper distance based on the new size
+            	final double newsize = Math.sqrt((e.getComponent().getHeight()*e.getComponent().getHeight()) +
+            			(e.getComponent().getWidth() * e.getComponent().getWidth()));
+            	final double distanceAdjust = (newsize - sketchSize) / 4;
+                setState(new CameraState(rotation, center, distance + distanceAdjust), 1);
             }
         });
 
@@ -418,7 +423,7 @@ public class PeasyCam {
 
 		public void mouseEvent(final MouseEvent e) {
 			if (resetOnDoubleClick && e.getAction() == MouseEvent.CLICK
-					&& e.getClickCount() == 2) {
+					&& e.getCount() == 2) {
 				reset();
 			} else if (e.getAction() == MouseEvent.RELEASE) {
 				dragConstraint = null;
@@ -453,7 +458,7 @@ public class PeasyCam {
 			} else if (e.getAction() == MouseEvent.ENTER) {
 				setMouseOverSketch(true);
 			} else if (e.getAction() == MouseEvent.WHEEL) {
-                wheelHandler.handleWheel(e.getAmount());
+                wheelHandler.handleWheel(e.getCount());
             }
         }
 	}
